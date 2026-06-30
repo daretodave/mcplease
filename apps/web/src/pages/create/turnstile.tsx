@@ -83,7 +83,15 @@ const fallbackBox = css({
   color: "state.ok",
 });
 
-const widgetSlot = css({ minHeight: "[65px]" });
+// Center the injected Turnstile iframe in the row and nudge it down a touch, so the 300×65 widget sits
+// balanced under the fields rather than hard against the left edge.
+const widgetSlot = css({
+  display: "flex",
+  justifyContent: "center",
+  minHeight: "[65px]",
+  paddingTop: "[10px]",
+  paddingBottom: "[5px]",
+});
 
 // The check couldn't load (a blocked third party, an offline moment). Say so and offer a retry, rather than
 // leaving an empty box and a submit button that is silently, permanently disabled.
