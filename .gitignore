@@ -1,0 +1,31 @@
+# dependencies
+node_modules/
+
+# builds / generated
+dist/
+build/
+.wrangler/
+styled-system/
+coverage/
+*.tsbuildinfo
+
+# tests
+playwright-report/
+test-results/
+.supabase-e2e-env.json
+
+# env / secrets — NEVER commit
+.env
+.env.*
+!.env.example
+
+# supabase local
+supabase/.branches/
+supabase/.temp/
+
+# editor / OS
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.log
