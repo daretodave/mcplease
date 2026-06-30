@@ -83,7 +83,7 @@ describe("setPreference", () => {
     expect(localStorage.getItem("mcplease-appearance")).toBe("light");
     expect(document.documentElement.dataset.theme).toBe("light");
     expect(document.querySelector('meta[name="theme-color"]')?.getAttribute("content")).toBe(
-      "#F7F7F5",
+      "#FFFFFF",
     );
     expect(useAppearance.getState().preference).toBe("light");
   });

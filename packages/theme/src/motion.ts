@@ -1,17 +1,30 @@
-// Motion tokens — AGNOSTIC (structured values only; the agnostic-seam guard scans this file). Durations
-// are numbers (ms); easings are bare timing-function strings. The web binding materializes these into
-// CSS animation/transition strings + keyframes. Placeholder until the design pass.
+// Motion tokens — AGNOSTIC (structured values only; the agnostic-seam guard scans this file). Easings
+// are bare timing-function strings; durations are numbers (ms). The web binding materializes these into
+// CSS transition/animation strings + keyframes.
+//
+// Calm, ease-out by default — `out` is the house curve. The delight beat (the spark bloom + "Copied!"
+// seal) is capped at <= 1.5s and is decorative only, never blocking; everything degrades to instant
+// under prefers-reduced-motion (the web binding's globalCss handles that).
 
-export interface MotionToken {
-  /** duration in milliseconds */
-  durationMs: number;
-  /** a CSS timing function, applied verbatim by the web binding */
-  easing: string;
-}
+/** Timing functions, applied verbatim by the web binding. */
+export const easings = {
+  /** the house curve — calm ease-out */
+  out: "cubic-bezier(0.16, 1, 0.3, 1)",
+  /** material-standard, for symmetric moves */
+  standard: "cubic-bezier(0.4, 0, 0.2, 1)",
+  inOut: "cubic-bezier(0.65, 0, 0.35, 1)",
+  /** one gentle overshoot — the success card's single spring */
+  spring: "cubic-bezier(0.34, 1.56, 0.64, 1)",
+  /** the delight beat's curve */
+  delight: "cubic-bezier(0.16, 1, 0.3, 1)",
+} as const;
 
-export const motion = {
-  /** quick affordance feedback (a button press, a copy flash) */
-  fast: { durationMs: 120, easing: "cubic-bezier(0.4, 0, 0.2, 1)" },
-  /** the default transition (panel reveals, the create→success cross) */
-  base: { durationMs: 200, easing: "cubic-bezier(0.4, 0, 0.2, 1)" },
-} as const satisfies Record<string, MotionToken>;
+/** Durations in milliseconds. fast = hover/press; base = most transitions; slow = overlays/reveals;
+ *  delight = the spark bloom + seal (under the 1.5s ceiling). */
+export const durations = {
+  instant: 90,
+  fast: 140,
+  base: 220,
+  slow: 340,
+  delight: 1100,
+} as const;

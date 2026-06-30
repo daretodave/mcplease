@@ -5,7 +5,7 @@ export type Appearance = "dark" | "light" | "system";
 
 const STORAGE_KEY = "mcplease-appearance";
 const DARK_CANVAS = "#0B0D12";
-const LIGHT_CANVAS = "#F7F7F5";
+const LIGHT_CANVAS = "#FFFFFF";
 
 interface AppearanceState {
   /** the persisted preference */

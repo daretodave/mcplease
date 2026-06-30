@@ -1,14 +1,46 @@
 // The accent registry — AGNOSTIC (structured values only; the agnostic-seam guard scans this file).
-// mcplease is a single-brand product (no per-team accent), so this is just the brand accent + its
-// light companion (deepened for >=4.5:1 as text/border on paper) and the wash strengths the web
-// binding turns into color-mix()/rgba(). Placeholder until the design pass.
+// mcplease is a single-brand product (no per-team accent): one confident violet carries brand, primary
+// action, AND focus — deliberately not split. The accent is a full per-theme ramp because hover/press
+// and the as-text/border reading differ between dark and light. The soft/line/ring washes are { hex,
+// alpha } structured intent; the web binding turns them into rgba().
 
-/** The brand accent + its light companion (the accent-on-light rule: accent-as-text/border on paper
- *  deepens one step; fills/rings keep the full accent in both themes). */
+import type { AlphaToken } from "./tokens.js";
+
+/** One theme's accent ramp. base = the fill; hover/active darken one then two steps; fg = text on the
+ *  accent; text = the accent used AS text on a surface (links); soft/line/ring are the tinted
+ *  fill / border / focus-glow washes. */
+export interface AccentRamp {
+  base: string;
+  hover: string;
+  active: string;
+  fg: string;
+  text: string;
+  soft: AlphaToken;
+  line: AlphaToken;
+  ring: AlphaToken;
+}
+
+/** The accent in both themes. Dark base is AA on white text (~4.7:1); light base is deeper (~6.2:1).
+ *  Hover darkens one step, press one deeper, in both. */
 export const accent = {
-  base: "#6E56CF",
-  light: "#5B46B0",
-} as const;
-
-/** Accent wash strengths in percent — the web binding materializes each into a color-mix()/rgba(). */
-export const accentSteps = [8, 12, 45] as const;
+  dark: {
+    base: "#7A55F5",
+    hover: "#694BE8",
+    active: "#5B3FD6",
+    fg: "#FFFFFF",
+    text: "#9B82FF",
+    soft: { hex: "#7C5CFF", alpha: 0.16 },
+    line: { hex: "#7C5CFF", alpha: 0.34 },
+    ring: { hex: "#8468FF", alpha: 0.55 },
+  },
+  light: {
+    base: "#6A47F5",
+    hover: "#5A38E0",
+    active: "#4C2DC9",
+    fg: "#FFFFFF",
+    text: "#6A47F5",
+    soft: { hex: "#6A47F5", alpha: 0.1 },
+    line: { hex: "#6A47F5", alpha: 0.26 },
+    ring: { hex: "#6A47F5", alpha: 0.4 },
+  },
+} as const satisfies Record<"dark" | "light", AccentRamp>;
