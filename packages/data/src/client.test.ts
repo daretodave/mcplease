@@ -1,5 +1,5 @@
 import { afterAll, describe, expect, it, vi } from "vitest";
-import { createBrowserClient } from "./client.js";
+import { createBrowserClient, createServiceClient } from "./client.js";
 
 // The browser client is for browsers: fake the WebSocket global the realtime client probes for at
 // construction (Node 20 has none — a real connection is never opened here).
@@ -16,6 +16,21 @@ describe("createBrowserClient", () => {
 
   it("does not persist a session (mcplease has no accounts)", () => {
     const client = createBrowserClient("https://example.supabase.co", "anon-key");
+    expect((client.auth as unknown as { persistSession?: boolean }).persistSession ?? false).toBe(
+      false,
+    );
+  });
+});
+
+describe("createServiceClient", () => {
+  it("builds a Supabase client exposing the RPC surface for the create edge", () => {
+    const client = createServiceClient("https://example.supabase.co", "service-role-key");
+    expect(typeof client.rpc).toBe("function");
+    expect(typeof client.from).toBe("function");
+  });
+
+  it("does not persist a session either", () => {
+    const client = createServiceClient("https://example.supabase.co", "service-role-key");
     expect((client.auth as unknown as { persistSession?: boolean }).persistSession ?? false).toBe(
       false,
     );

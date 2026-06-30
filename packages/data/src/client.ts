@@ -16,3 +16,15 @@ export function createBrowserClient(url: string, anonKey: string): McpleaseClien
     auth: { persistSession: false, autoRefreshToken: false },
   });
 }
+
+/**
+ * The service-role client — held by the `api/links.ts` create Pages Function ALONE, to call the
+ * `create_link` RPC after it verifies Turnstile. The service-role key bypasses RLS, so it must never
+ * reach the browser; this factory exists so the one privileged call site is explicit and greppable. Like
+ * the browser client it persists no session (there are no accounts).
+ */
+export function createServiceClient(url: string, serviceRoleKey: string): McpleaseClient {
+  return createClient<Database>(url, serviceRoleKey, {
+    auth: { persistSession: false, autoRefreshToken: false },
+  });
+}
