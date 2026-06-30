@@ -3,6 +3,7 @@ import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import { queryClient } from "./lib/query-client";
 import { CreatePage } from "./pages/create/create";
 import { Placeholder } from "./pages/placeholder";
+import { SharePage } from "./pages/share/share";
 
 // The client-only route table. The landing is the create form; the rest render a placeholder until their
 // real screen is designed. The shapes (/, /<slug>, /e/<uuid>, /terms, /privacy) are the durable part. Static
@@ -41,12 +42,7 @@ const router = createBrowserRouter([
   },
   {
     path: "/:slug",
-    element: (
-      <Placeholder
-        title="Connect to this MCP server"
-        blurb="This is where a shared server shows your client the way to connect. The instructions are on their way."
-      />
-    ),
+    element: <SharePage />,
   },
   {
     path: "*",

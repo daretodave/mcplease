@@ -1,27 +1,30 @@
-// Edge handler for /og/<slug>.png — the share card image.
-//
-// The final card is rendered with workers-og (Satori → SVG → resvg-wasm → PNG) from the link's name +
-// tagline. Until that lands, this returns a self-contained, brand-themed SVG card (no dependencies),
-// edge-cached. Most unfurlers accept SVG; the PNG renderer replaces this without changing the route.
+// Edge handler for /og/<slug>.png — the share-card image a crawler unfurls (referenced by buildShareMeta's
+// og:image). It reads the link with the anon key and renders the brand OG card with the link's tagline (or
+// name) as the headline, via workers-og (Satori → resvg-wasm → PNG). A read blip falls back to the brand
+// default headline rather than failing the image.
 
-const CANVAS = "#0B0D12";
-const INK = "#F7F7F5";
-const ACCENT = "#6E56CF";
+import { createBrowserClient, createData } from "@mcplease/data";
+import type { PublicLink } from "@mcplease/model";
+import { DEFAULT_HEADLINE, ogImageResponse } from "../_og";
 
-function card(): string {
-  return `<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
-  <rect width="1200" height="630" fill="${CANVAS}"/>
-  <rect x="80" y="80" width="1040" height="470" rx="24" fill="none" stroke="${ACCENT}" stroke-width="3"/>
-  <text x="120" y="300" font-family="system-ui, sans-serif" font-size="56" font-weight="700" fill="${INK}">Connect to MCP</text>
-  <text x="120" y="370" font-family="system-ui, sans-serif" font-size="32" fill="${ACCENT}">mcplease.io</text>
-</svg>`;
+interface Env {
+  SUPABASE_URL: string;
+  SUPABASE_ANON_KEY: string;
 }
 
-export const onRequestGet: PagesFunction = () => {
-  return new Response(card(), {
-    headers: {
-      "content-type": "image/svg+xml; charset=utf-8",
-      "cache-control": "public, max-age=300",
-    },
-  });
+/** The card headline for a link: its tagline, else its name, else the brand default. */
+function headlineFor(link: PublicLink | null): string {
+  return link?.tagline?.trim() || link?.name?.trim() || DEFAULT_HEADLINE;
+}
+
+export const onRequestGet: PagesFunction<Env> = async ({ env, params }) => {
+  const slug = String(params.slug).replace(/\.png$/, "");
+  let link: PublicLink | null = null;
+  try {
+    const data = createData(createBrowserClient(env.SUPABASE_URL, env.SUPABASE_ANON_KEY));
+    link = await data.links.getPublic(slug);
+  } catch {
+    // A read blip shouldn't fail the image — render the default headline.
+  }
+  return ogImageResponse({ headline: headlineFor(link), slug });
 };

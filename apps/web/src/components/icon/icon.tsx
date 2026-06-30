@@ -82,6 +82,12 @@ const STROKE = {
       <path d="m15.5 7.5 3 3L22 7l-3-3" />
     </>
   ),
+  search: (
+    <>
+      <circle cx="11" cy="11" r="8" />
+      <path d="m21 21-4.3-4.3" />
+    </>
+  ),
 } satisfies Record<string, ReactNode>;
 
 const FILLED = {
