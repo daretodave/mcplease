@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>mcplease — share an MCP server as a link</title>
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+
+    <!-- Appearance boot: set <html data-theme> + theme-color BEFORE first paint so there's no flash.
+         The choice is per-device in localStorage ('system' follows the device); src/stores/appearance.ts
+         re-affirms it once React mounts. The two canvas hexes are the brand anchors (kept inline because
+         the boot must run before the bundle loads). -->
+    <meta name="theme-color" content="#0B0D12" />
+    <script>
+      (function () {
+        try {
+          var pref = localStorage.getItem("mcplease-appearance") || "system";
+          var dark =
+            pref === "dark" ||
+            (pref !== "light" &&
+              (typeof matchMedia !== "function" ||
+                matchMedia("(prefers-color-scheme: dark)").matches));
+          document.documentElement.dataset.theme = dark ? "dark" : "light";
+          var m = document.querySelector('meta[name="theme-color"]');
+          if (m) m.setAttribute("content", dark ? "#0B0D12" : "#F7F7F5");
+        } catch (e) {
+          document.documentElement.dataset.theme = "dark";
+        }
+      })();
+    </script>
+
+    <!-- Brand fallback head. The SPA is static with no SSR, so a scraper sees only this served
+         index.html on non-slug routes; per-link share cards are edge-injected on /<slug>. URLs are
+         absolute — scrapers don't resolve relative ones. -->
+    <meta
+      name="description"
+      content="Paste your MCP server, get a link. Whoever opens it picks their client and connects in a click — image-driven setup, copy-paste commands, a one-click Add where supported. No account."
+    />
+    <link rel="canonical" href="https://mcplease.io/" />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="mcplease" />
+    <meta property="og:url" content="https://mcplease.io/" />
+    <meta property="og:title" content="mcplease — share an MCP server as a link" />
+    <meta
+      property="og:description"
+      content="Paste your MCP server, get a link. Whoever opens it picks their client and connects in a click."
+    />
+
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content="mcplease — share an MCP server as a link" />
+    <meta
+      name="twitter:description"
+      content="Paste your MCP server, get a link. Whoever opens it picks their client and connects in a click."
+    />
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

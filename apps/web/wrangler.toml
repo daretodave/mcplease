@@ -1,0 +1,13 @@
+# Cloudflare Pages config for the `mcplease` project. Wrangler reads this at `pages deploy` for the
+# project name + the Functions compatibility settings; the build output dir is `dist` (below) and the
+# functions/ dir is picked up from cwd (apps/web).
+#
+# nodejs_compat: the OG-card function renders at the edge with the Node compat shims.
+#
+# The runtime env (SUPABASE_URL + SUPABASE_ANON_KEY vars; the service-role key + Turnstile secret) is
+# configured on the Pages project itself and persists across deploys — so it is NOT duplicated here (the
+# committed toml carries no secrets).
+name = "mcplease"
+pages_build_output_dir = "dist"
+compatibility_date = "2025-05-05"
+compatibility_flags = ["nodejs_compat"]

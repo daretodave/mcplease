@@ -1,0 +1,25 @@
+{
+  "name": "@mcplease/data",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "The mcplease data layer — every read, write, and realtime call behind a clean domain API. Supabase lives ONLY inside this package (the seam); app code calls data.links.* and never names the vendor or a table. The sealed client lands first; the domain API arrives with the schema.",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run --coverage"
+  },
+  "dependencies": {
+    "@mcplease/model": "*",
+    "@supabase/supabase-js": "2.108.1"
+  },
+  "devDependencies": {
+    "@vitest/coverage-v8": "3.2.6",
+    "typescript": "5.9.3",
+    "vitest": "3.2.6"
+  }
+}

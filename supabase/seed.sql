@@ -1,0 +1,2 @@
+-- Local-only seed data for the hermetic E2E stack (applied by `supabase start`).
+-- Empty until there is something worth seeding; production is never seeded.

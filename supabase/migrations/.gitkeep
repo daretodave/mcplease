@@ -1,0 +1,1 @@
+# keeps the (currently empty) migrations dir in git; real migrations are timestamped *.sql files

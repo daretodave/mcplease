@@ -1,0 +1,5 @@
+# Cloudflare Pages SPA fallback. The client router owns /<slug>, /e/<uuid>, /terms, /privacy — none of
+# which are real files. Without this, a hard load / refresh / pasted deep link 404s on the edge (Pages
+# serves any real static asset first, so /assets/* and the Functions routes are untouched; only unknown
+# paths fall through to the app shell). Vite copies this into dist/ on build.
+/*    /index.html    200

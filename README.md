@@ -30,7 +30,19 @@ Connecting an MCP server today means the author hand-writes a setup matrix — a
 
 ## Development
 
-Local setup instructions arrive with the first app scaffold. Watch this space.
+An npm-workspaces monorepo (Node 20). Internal packages export TypeScript source directly — no build step.
+
+```bash
+npm install      # also wires git hooks (lefthook) + generates the Panda styled-system
+npm run dev      # the web app at apps/web
+npm test         # vitest with per-package coverage gates
+npm run e2e      # Playwright, hermetic, against the production bundle
+npm run build    # tsc + vite build → apps/web/dist
+```
+
+The whole CI gate runs locally too: `npm run typecheck`, `npm run lint`, `npm run format:check`,
+`npm run test:structure` (the co-located test law), `npm run test:agnostic-seam`. Conventions for working
+in the tree live in [CLAUDE.md](./CLAUDE.md).
 
 ## License
 

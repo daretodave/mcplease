@@ -1,0 +1,39 @@
+# Pre-commit: lint + format staged files before they ever reach CI.
+# Mirrors the CI quality gate: ESLint --max-warnings 0 + Prettier.
+# Installed by the root `prepare` script (`lefthook install`).
+pre-commit:
+  parallel: true
+  jobs:
+    - name: eslint
+      glob: "*.{ts,tsx}"
+      # --no-warn-ignored: don't fail when a staged file is eslint-ignored (the generated
+      # database.types.ts) — passing it explicitly would warn, and --max-warnings 0 would turn
+      # that warning into a blocked commit.
+      run: npx eslint --max-warnings 0 --no-warn-ignored {staged_files}
+    - name: prettier
+      glob: "*.{ts,tsx,json,css,yml,yaml}"
+      run: npx prettier --write {staged_files}
+      stage_fixed: true
+
+# Pre-push: run CI's "checks" job locally (.github/workflows/ci.yml) so a push can't red it.
+# Pre-commit only lints+formats STAGED files — the WHOLE-REPO gates (typecheck, --max-warnings 0
+# lint, format:check, the co-located test law, the agnostic-seam guard) aren't caught until CI
+# otherwise. This runs the SAME scripts as CI's `checks` job (keep the SET in lock-step when CI
+# changes) — in parallel here (order is irrelevant; they're independent read-only guards), serial
+# in CI. The HEAVY gates stay out by design: unit (`npm test`) + e2e are their own CI jobs
+# (minutes / need the supabase stack), and build+bundle-budget is welded behind build in CI — too
+# slow for every push. Keep these jobs GLOB-LESS on purpose: no glob = they run on EVERY push as
+# the whole-repo gates they are. Adding a glob would file-filter them into a silent skip.
+pre-push:
+  parallel: true
+  jobs:
+    - name: typecheck
+      run: npm run typecheck
+    - name: lint
+      run: npm run lint
+    - name: format-check
+      run: npm run format:check
+    - name: test-law
+      run: npm run test:structure
+    - name: agnostic-seam
+      run: npm run test:agnostic-seam

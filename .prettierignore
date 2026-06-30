@@ -1,0 +1,9 @@
+node_modules
+dist
+coverage
+styled-system
+playwright-report
+test-results
+package-lock.json
+**/database.types.ts
+**/*.md
