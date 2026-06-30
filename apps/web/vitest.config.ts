@@ -8,6 +8,13 @@ export default defineConfig({
     globals: false,
     setupFiles: ["./test-setup.ts"],
     include: ["src/**/*.test.{ts,tsx}"],
+    // Dummy public config so the data handle's Supabase client constructs under test; every network call
+    // is mocked, so these values are never dialled. The sitekey stays unset, so Turnstile takes its dev
+    // fallback unless a test opts into the widget path.
+    env: {
+      VITE_SUPABASE_URL: "http://localhost:55421",
+      VITE_SUPABASE_ANON_KEY: "test-anon-key",
+    },
     coverage: {
       provider: "v8",
       include: ["src/**"],

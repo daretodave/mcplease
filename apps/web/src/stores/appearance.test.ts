@@ -108,17 +108,35 @@ describe("startAppearanceSync", () => {
 
   it("repaints on a device flip while following 'system', then stops after teardown", () => {
     const mql = stubMatchMedia(false);
-    useAppearance.setState({ preference: "system" });
+    useAppearance.setState({ preference: "system", resolved: "light" });
     const stop = startAppearanceSync();
     expect(document.documentElement.dataset.theme).toBe("light");
+    expect(useAppearance.getState().resolved).toBe("light");
 
     mql.matches = true;
     mql.dispatch();
     expect(document.documentElement.dataset.theme).toBe("dark");
+    // the published resolved theme flips too, so live consumers (the toggle glyph) re-render — the
+    // preference itself never changed, so without this they'd be stuck on the stale icon
+    expect(useAppearance.getState().resolved).toBe("dark");
 
     stop();
     mql.matches = false;
     mql.dispatch();
     expect(document.documentElement.dataset.theme).toBe("dark"); // listener removed — no repaint
+    expect(useAppearance.getState().resolved).toBe("dark");
+  });
+
+  it("ignores a device flip when an explicit theme is chosen", () => {
+    const mql = stubMatchMedia(false);
+    useAppearance.setState({ preference: "light", resolved: "light" });
+    const stop = startAppearanceSync();
+
+    mql.matches = true; // the OS went dark, but the user pinned light
+    mql.dispatch();
+    expect(useAppearance.getState().resolved).toBe("light");
+    expect(document.documentElement.dataset.theme).toBe("light");
+
+    stop();
   });
 });

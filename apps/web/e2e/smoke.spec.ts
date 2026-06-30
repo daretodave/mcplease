@@ -1,9 +1,9 @@
 import { test, expect } from "@playwright/test";
 
-test("the landing renders the brand and a link to the source", async ({ page }) => {
+test("the landing renders the create form and a link to the source", async ({ page }) => {
   await page.goto("/");
-  await expect(page.getByRole("heading", { name: "mcplease" })).toBeVisible();
-  await expect(page.getByRole("link", { name: "github.com/daretodave/mcplease" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: /your MCP server/i })).toBeVisible();
+  await expect(page.getByRole("link", { name: "GitHub" })).toBeVisible();
 });
 
 test("a slug route resolves to the share placeholder via the SPA fallback", async ({ page }) => {

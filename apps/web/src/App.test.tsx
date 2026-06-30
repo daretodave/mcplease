@@ -3,8 +3,8 @@ import { render, screen } from "@testing-library/react";
 import { App } from "./App";
 
 describe("App", () => {
-  it("renders the landing route at /", async () => {
+  it("renders the create form on the landing route at /", async () => {
     render(<App />);
-    expect(await screen.findByRole("heading", { name: "mcplease" })).toBeInTheDocument();
+    expect(await screen.findByRole("heading", { name: /your MCP server/i })).toBeInTheDocument();
   });
 });

@@ -187,6 +187,23 @@ export const mcpleasePreset: Preset = {
     breakpoints: Object.fromEntries(
       Object.entries(breakpoints).map(([name, px]) => [name, `${px}px`]),
     ),
+    // Design-system motion as named keyframes. `spin` drives every loading/checking glyph; `sparkBloom`
+    // is the one delight beat — the accent spark blooms up and fades at the moment of copy/connect. The
+    // rest are the screen entrances: `fade`/`pop` bring the success overlay in, `bloom` settles its body,
+    // and `reveal` slides the conditional fields (the stdio trio, the details panel) down on appear. Each
+    // resolves to a settled base state, so a paused clock under reduced-motion never strands hidden content.
+    keyframes: {
+      spin: { to: { transform: "rotate(360deg)" } },
+      sparkBloom: {
+        "0%": { transform: "translate(-50%, -50%) scale(0.35) rotate(-18deg)", opacity: "0" },
+        "55%": { transform: "translate(-50%, -118%) scale(1.15) rotate(12deg)", opacity: "1" },
+        "100%": { transform: "translate(-50%, -185%) scale(0.85) rotate(12deg)", opacity: "0" },
+      },
+      fade: { from: { opacity: "0" }, to: { opacity: "1" } },
+      pop: { from: { transform: "translateY(10px) scale(0.98)" }, to: { transform: "none" } },
+      bloom: { from: { transform: "translateY(6px)" }, to: { transform: "none" } },
+      reveal: { from: { transform: "translateY(-6px)" }, to: { transform: "none" } },
+    },
   },
   globalCss: {
     "*, *::before, *::after": { boxSizing: "border-box" },

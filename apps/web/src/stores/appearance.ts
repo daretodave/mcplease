@@ -10,6 +10,9 @@ const LIGHT_CANVAS = "#FFFFFF";
 interface AppearanceState {
   /** the persisted preference */
   preference: Appearance;
+  /** the concrete theme currently shown — tracks the OS query while preference is 'system', so anything
+   *  that needs to render the live theme (the toggle's glyph) re-renders when the OS flips */
+  resolved: "dark" | "light";
   /** set + persist the preference, and repaint immediately */
   setPreference: (next: Appearance) => void;
 }
@@ -32,27 +35,32 @@ export function resolveTheme(pref: Appearance): "dark" | "light" {
   return prefersDark ? "dark" : "light";
 }
 
-/** Apply the resolved theme to <html data-theme> + the theme-color meta (matches the index.html boot). */
-function applyTheme(pref: Appearance): void {
+/** Apply the resolved theme to <html data-theme> + the theme-color meta (matches the index.html boot), and
+ *  return the concrete theme it resolved to. */
+function applyTheme(pref: Appearance): "dark" | "light" {
   const theme = resolveTheme(pref);
   document.documentElement.dataset.theme = theme;
   document
     .querySelector('meta[name="theme-color"]')
     ?.setAttribute("content", theme === "dark" ? DARK_CANVAS : LIGHT_CANVAS);
+  return theme;
 }
 
-export const useAppearance = create<AppearanceState>((set) => ({
-  preference: readStored(),
-  setPreference: (next) => {
-    try {
-      localStorage.setItem(STORAGE_KEY, next);
-    } catch {
-      // storage disabled (private mode) — the in-memory preference still applies this session
-    }
-    applyTheme(next);
-    set({ preference: next });
-  },
-}));
+export const useAppearance = create<AppearanceState>((set) => {
+  const preference = readStored();
+  return {
+    preference,
+    resolved: resolveTheme(preference),
+    setPreference: (next) => {
+      try {
+        localStorage.setItem(STORAGE_KEY, next);
+      } catch {
+        // storage disabled (private mode) — the in-memory preference still applies this session
+      }
+      set({ preference: next, resolved: applyTheme(next) });
+    },
+  };
+});
 
 /**
  * Re-affirm the theme from the store on mount (the index.html boot already painted it before first
@@ -60,10 +68,14 @@ export const useAppearance = create<AppearanceState>((set) => ({
  * teardown for the media listener.
  */
 export function startAppearanceSync(): () => void {
-  applyTheme(useAppearance.getState().preference);
+  useAppearance.setState({ resolved: applyTheme(useAppearance.getState().preference) });
   const mq = typeof matchMedia === "function" ? matchMedia("(prefers-color-scheme: dark)") : null;
   const onChange = (): void => {
-    if (useAppearance.getState().preference === "system") applyTheme("system");
+    // The OS theme flipped: when we're following it, repaint AND publish the new resolved theme so live
+    // consumers (the toggle glyph) re-render — `preference` itself hasn't changed, so they otherwise wouldn't.
+    if (useAppearance.getState().preference === "system") {
+      useAppearance.setState({ resolved: applyTheme("system") });
+    }
   };
   mq?.addEventListener("change", onChange);
   return () => mq?.removeEventListener("change", onChange);
