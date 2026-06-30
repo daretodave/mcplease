@@ -194,7 +194,6 @@ function Resolved({ link }: { link: PublicLink }) {
             <>
               <OneClickBanner
                 client={client}
-                mode={mode}
                 href={href}
                 onAdd={() => track.oneClick({ client, transport: link.kind })}
               />

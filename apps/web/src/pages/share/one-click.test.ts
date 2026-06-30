@@ -57,10 +57,10 @@ describe("oneClickHref", () => {
     expect(JSON.parse(atob(config))).toEqual({ url: "https://acme.dev/mcp" });
   });
 
-  it("builds a VS Code deep link with name + url json", () => {
+  it("builds a VS Code deep link with name + type + url json (type is required for remote)", () => {
     const href = oneClickHref("vscode", http) ?? "";
     const json = JSON.parse(decodeURIComponent(href.replace("vscode:mcp/install?", "")));
-    expect(json).toEqual({ name: "acme-mcp", url: "https://acme.dev/mcp" });
+    expect(json).toEqual({ name: "acme-mcp", type: "http", url: "https://acme.dev/mcp" });
   });
 
   it("encodes a stdio run target as command + args", () => {
@@ -75,8 +75,17 @@ describe("oneClickHref", () => {
     expect(json.args).toEqual(["dist/server.js"]);
   });
 
-  it("has no deep link for partial or manual clients", () => {
-    expect(oneClickHref("claude-desktop", http)).toBeNull();
+  it("hands Claude a pre-filled claude.ai connector link on http, but not on stdio", () => {
+    const href = oneClickHref("claude-desktop", http) ?? "";
+    expect(href).toContain("https://claude.ai/customize/connectors?modal=add-custom-connector");
+    expect(href).toContain("connectorName=acme-mcp");
+    expect(href).toContain(`connectorUrl=${encodeURIComponent("https://acme.dev/mcp")}`);
+    // Local servers can't be added by a web link — manual config only.
+    expect(oneClickHref("claude-desktop", stdio)).toBeNull();
+  });
+
+  it("has no deep link for manual-only clients", () => {
     expect(oneClickHref("claude-code", http)).toBeNull();
+    expect(oneClickHref("zed", http)).toBeNull();
   });
 });

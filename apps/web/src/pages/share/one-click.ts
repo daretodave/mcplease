@@ -2,10 +2,11 @@ import { getClient, type ClientId } from "@mcplease/client-matrix";
 import type { LinkKind, PublicLink } from "@mcplease/model";
 import { serverName } from "./clients";
 
-// The one-click "Add" deep links — the share page's express lane, shown above the always-present manual
-// steps. Cursor and VS Code expose a full install scheme; Claude Desktop's is partial (it opens the app,
-// you confirm a step in-place), so it shows the banner but has no install URL to hand off. Everyone else is
-// manual-only. The scheme prefixes are fixed; the payload shapes follow each client's published install link.
+// The one-click "Add" links — the share page's express lane, shown above the always-present manual steps.
+// Three clients can be handed off to: Cursor and VS Code via a custom URL scheme (cursor:// / vscode:) that
+// opens the app, and Claude via an https://claude.ai link that opens a pre-filled "Add custom connector"
+// dialog the reader confirms. None of them can confirm completion back to the page, so the banner only ever
+// claims "Opening", never "Added". Every other client is manual-only.
 
 /** How complete a client's one-click is — `full` installs end to end, `partial` finishes in-app. */
 export type OneClickMode = "full" | "partial";
@@ -45,8 +46,17 @@ export function oneClickHref(client: ClientId, link: PublicLink): string | null 
     return `cursor://anysphere.cursor-deeplink/mcp/install?name=${encodeURIComponent(name)}&config=${encodeURIComponent(config)}`;
   }
   if (client === "vscode") {
-    const obj = { name, ...payload(link) };
+    // VS Code wants a flat object that hoists `name`; a remote server must also carry `type` so VS Code
+    // picks its transport (a local server is inferred from `command`/`args`).
+    const obj =
+      link.kind === "http" ? { name, type: "http", ...payload(link) } : { name, ...payload(link) };
     return `vscode:mcp/install?${encodeURIComponent(JSON.stringify(obj))}`;
+  }
+  if (client === "claude-desktop" && link.kind === "http") {
+    // Claude has no install URL scheme; its real one-click is a claude.ai link that opens a PRE-FILLED
+    // "Add custom connector" dialog the reader reviews and confirms (remote only — a local server is manual
+    // config). The reader still authenticates in-app after adding; we only hand off the pre-fill.
+    return `https://claude.ai/customize/connectors?modal=add-custom-connector&connectorName=${encodeURIComponent(name)}&connectorUrl=${encodeURIComponent(link.serverUrl || "")}`;
   }
   return null;
 }
