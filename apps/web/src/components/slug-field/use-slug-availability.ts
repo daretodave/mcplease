@@ -13,9 +13,16 @@ import type { SlugStatus } from "./slug-field";
 
 const DEBOUNCE_MS = 650;
 
-/** The realtime availability status for a slug claim, debounced and format-gated. */
-export function useSlugAvailability(raw: string): SlugStatus {
+/**
+ * The realtime availability status for a slug claim, debounced and format-gated.
+ *
+ * `current` is the slug the caller already owns (the edit form's persisted slug): a claim equal to it reads
+ * `idle`, never "taken" — you can't collide with yourself, and re-typing your own slug shouldn't fire a
+ * lookup. The create form owns no slug, so it omits the argument and every non-empty claim is checked.
+ */
+export function useSlugAvailability(raw: string, current?: string): SlugStatus {
   const slug = raw.trim().toLowerCase();
+  const owned = current?.trim().toLowerCase();
 
   // The value that actually reaches the server trails the input by one quiet beat.
   const [debounced, setDebounced] = useState(slug);
@@ -24,6 +31,7 @@ export function useSlugAvailability(raw: string): SlugStatus {
     return () => clearTimeout(id);
   }, [slug]);
 
+  const unchanged = owned !== undefined && slug === owned;
   const valid = slug !== "" && slugProblem(slug) === null;
   const settled = debounced === slug;
 
@@ -38,8 +46,8 @@ export function useSlugAvailability(raw: string): SlugStatus {
         return null;
       }
     },
-    // Only a well-formed, settled, non-empty claim is worth a lookup.
-    enabled: valid && settled,
+    // Only a well-formed, settled, non-empty claim the caller doesn't already own is worth a lookup.
+    enabled: valid && settled && !unchanged,
     staleTime: 30_000,
     retry: false,
     // Run even when the browser reports offline — the default "online" mode would PAUSE the query (queryFn
@@ -49,6 +57,8 @@ export function useSlugAvailability(raw: string): SlugStatus {
   });
 
   if (slug === "") return "idle";
+  // Your own current slug is already yours — no status, no lookup.
+  if (unchanged) return "idle";
   if (!valid) return "invalid";
   // Still typing toward the debounce, or the lookup is in flight.
   if (!settled || query.isFetching) return "checking";

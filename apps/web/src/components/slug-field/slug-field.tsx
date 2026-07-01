@@ -18,6 +18,9 @@ export interface SlugFieldProps {
   onChange: (value: string) => void;
   prefix?: string;
   label?: string;
+  /** The idle helper shown when there's no claim to judge yet. Create invites a blank ("we'll mint one");
+   *  edit reassures that a change is safe. */
+  hint?: ReactNode;
 }
 
 type Tone = "muted" | "ok" | "bad" | "warn";
@@ -103,6 +106,7 @@ export function SlugField({
   onChange,
   prefix = "mcplease.io/",
   label = "Claim your slug — optional",
+  hint = "Leave it blank and we’ll mint a friendly one.",
 }: SlugFieldProps) {
   const statusId = useId();
   // The status row only appears once there's something to judge.
@@ -141,7 +145,7 @@ export function SlugField({
             {info.word}
           </>
         ) : (
-          "Leave it blank and we’ll mint a friendly one."
+          hint
         )}
       </p>
     </div>
