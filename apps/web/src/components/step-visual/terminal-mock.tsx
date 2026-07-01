@@ -1,7 +1,8 @@
 import { css, cx } from "../../../styled-system/css";
 
-// A visual that resembles a terminal — the three window dots, a title, then prompt lines. Used for the
-// CLI-driven connect steps (claude-code, vscode's `code --add-mcp`, the stdio clone/build).
+// A visual that resembles a terminal — the three window dots, a title, then lines. Used for the CLI-driven
+// connect steps (claude-code, the stdio clone/build) and for the `/mcp` authenticate beat, where lines carry
+// a status tag (connected / needs authentication) and the row the reader acts on glows.
 
 export interface TerminalLine {
   text: string;
@@ -11,6 +12,14 @@ export interface TerminalLine {
   caret?: boolean;
   /** render the line muted (an annotation, not a typed command) */
   dim?: boolean;
+  /** render as an accent heading (e.g. a menu title like "Manage MCP servers") */
+  head?: boolean;
+  /** highlight this line — the entry the reader acts on */
+  glow?: boolean;
+  /** a right-aligned status tag (e.g. "needs authentication") */
+  tag?: string;
+  /** the tag's tone — adds a ✓ / △ / ✕ marker so it's not colour-only */
+  tagState?: "ok" | "warn" | "bad";
 }
 
 const root = css({ fontFamily: "mono", fontSize: "[12.5px]" });
@@ -46,9 +55,46 @@ const body = css({
   lineHeight: "[1.5]",
 });
 
-const line = css({ color: "text.primary" });
+const lineBase = css({
+  display: "flex",
+  alignItems: "center",
+  gap: "[8px]",
+  color: "text.primary",
+});
 const lineDim = css({ color: "text.faint" });
+const lineHead = css({ color: "accent.text", fontWeight: "semibold" });
+const lineGlow = css({
+  padding: "[5px 9px]",
+  marginInline: "[-4px]",
+  borderRadius: "[7px]",
+  background: "accent.soft",
+  borderWidth: "hairline",
+  borderStyle: "solid",
+  borderColor: "accent.line",
+  color: "accent.text",
+});
+const lineText = css({
+  minWidth: "[0]",
+  overflow: "hidden",
+  textOverflow: "ellipsis",
+  whiteSpace: "nowrap",
+});
 const mark = css({ color: "accent.text" });
+
+const tagBase = css({
+  marginLeft: "auto",
+  flexShrink: "0",
+  display: "inline-flex",
+  alignItems: "center",
+  gap: "[5px]",
+  fontSize: "[11px]",
+});
+const tagOk = css({ color: "state.ok.text" });
+const tagWarn = css({ color: "state.warn.text" });
+const tagBad = css({ color: "state.bad.text" });
+
+const TAG_MARK = { ok: "✓", warn: "△", bad: "✕" } as const;
+const TAG_TONE = { ok: tagOk, warn: tagWarn, bad: tagBad } as const;
 
 export interface TerminalMockProps {
   title?: string;
@@ -67,10 +113,21 @@ export function TerminalMock({ title: titleText = "Terminal", lines = [] }: Term
       </div>
       <div className={body}>
         {lines.map((ln, i) => (
-          <div key={i} className={cx(line, ln.dim && lineDim)}>
-            {ln.prompt && <span className={mark}>$ </span>}
-            {ln.text}
-            {ln.caret && <span className={mark}>▍</span>}
+          <div
+            key={i}
+            className={cx(lineBase, ln.dim && lineDim, ln.head && lineHead, ln.glow && lineGlow)}
+          >
+            <span className={lineText}>
+              {ln.prompt && <span className={mark}>$ </span>}
+              {ln.text}
+              {ln.caret && <span className={mark}>▍</span>}
+            </span>
+            {ln.tag && (
+              <span className={cx(tagBase, ln.tagState && TAG_TONE[ln.tagState])}>
+                {ln.tagState && <span aria-hidden="true">{TAG_MARK[ln.tagState]}</span>}
+                {ln.tag}
+              </span>
+            )}
           </div>
         ))}
       </div>

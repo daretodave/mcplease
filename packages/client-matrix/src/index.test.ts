@@ -15,6 +15,18 @@ describe("the matrix", () => {
     }
   });
 
+  it("labels the Claude row 'Claude' (the connector lives on the account, not just the desktop app)", () => {
+    expect(getClient("claude-desktop")?.label).toBe("Claude");
+  });
+
+  it("declares a remote config key for every config-file http client (incl. Zed's context_servers.url)", () => {
+    // A client that takes a remote URL via a JSON config file must name the key it uses; only CLI-only
+    // (claude-code), remote-only-UI (chatgpt), and raw-snippet (goose, generic) targets leave it undefined.
+    expect(getClient("zed")?.remoteConfigKey).toBe("url");
+    const declared = CLIENTS.filter((c) => c.remoteConfigKey !== undefined).map((c) => c.id);
+    expect(declared).toEqual(["claude-desktop", "cursor", "vscode", "windsurf", "cline", "zed"]);
+  });
+
   it("ChatGPT is the one remote-only client (no stdio)", () => {
     expect(getClient("chatgpt")?.stdio).toBe(false);
     const stdioOnly = CLIENTS.filter((c) => !c.stdio).map((c) => c.id);

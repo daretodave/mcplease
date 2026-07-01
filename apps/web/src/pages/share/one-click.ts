@@ -11,12 +11,14 @@ import { serverName } from "./clients";
 /** How complete a client's one-click is — `full` installs end to end, `partial` finishes in-app. */
 export type OneClickMode = "full" | "partial";
 
-/** Whether — and how completely — a client offers one-click for this transport. `partial` (Claude Desktop)
- *  is remote-only; a local (stdio) link only one-clicks where support is `full` (Cursor, VS Code). */
+/** Whether — and how completely — a client offers one-click for this transport. One-click is REMOTE-ONLY: a
+ *  local (stdio) server has to be cloned and built first, so an "Add" deep-link would only write a config
+ *  pointing at a binary that doesn't exist yet. A stdio link always falls back to the manual clone→build→run
+ *  storyboard. */
 export function oneClickMode(client: ClientId, kind: LinkKind): OneClickMode | null {
   const entry = getClient(client);
   if (!entry || entry.oneClick === "none") return null;
-  if (kind === "stdio" && entry.oneClick !== "full") return null;
+  if (kind === "stdio") return null;
   return entry.oneClick;
 }
 
