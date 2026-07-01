@@ -84,4 +84,27 @@ describe("useSlugAvailability", () => {
     rerender("good-slug");
     await waitFor(() => expect(result.current).toBe("available"), { timeout: 2000 });
   });
+
+  it("treats the caller's own current slug as idle and never asks the server", () => {
+    // The edit form owns a slug; re-typing it must not read "taken" (you can't collide with yourself) nor
+    // fire a lookup. Case/whitespace-insensitively equal to `current` → idle.
+    const { result } = renderHook(() => useSlugAvailability("My-Slug", "my-slug"), {
+      wrapper: wrap(),
+    });
+    expect(result.current).toBe("idle");
+    expect(slugAvailable).not.toHaveBeenCalled();
+  });
+
+  it("checks a changed slug even when a current one is owned", async () => {
+    slugAvailable.mockResolvedValue(true);
+    const { result, rerender } = renderHook((s: string) => useSlugAvailability(s, "old-slug"), {
+      wrapper: wrap(),
+      initialProps: "old-slug",
+    });
+    expect(result.current).toBe("idle"); // unchanged from the owned slug
+
+    rerender("new-slug");
+    await waitFor(() => expect(result.current).toBe("available"), { timeout: 2000 });
+    expect(slugAvailable).toHaveBeenCalledWith("new-slug");
+  });
 });

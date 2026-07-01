@@ -2,6 +2,7 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import { queryClient } from "./lib/query-client";
 import { CreatePage } from "./pages/create/create";
+import { EditPage } from "./pages/edit/edit";
 import { Placeholder } from "./pages/placeholder";
 import { SharePage } from "./pages/share/share";
 
@@ -15,12 +16,7 @@ const router = createBrowserRouter([
   },
   {
     path: "/e/:uuid",
-    element: (
-      <Placeholder
-        title="Edit your link"
-        blurb="Your one-time edit link opens here — change the server, the slug, or the details. Coming soon."
-      />
-    ),
+    element: <EditPage />,
   },
   {
     path: "/terms",
