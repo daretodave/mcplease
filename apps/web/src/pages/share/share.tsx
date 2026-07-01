@@ -11,15 +11,15 @@ import { ClientPicker } from "../../components/client-picker/client-picker";
 import { Footer } from "../../components/footer/footer";
 import { Icon } from "../../components/icon/icon";
 import { Logo } from "../../components/logo/logo";
-import { StepCard } from "../../components/step-card/step-card";
 import { ThemeToggle } from "../../components/theme-toggle/theme-toggle";
 import { data } from "../../lib/data";
 import { BadgePanel } from "./badge-panel";
-import { buildSteps } from "./build-steps";
+import { BeatRow, ConnectedRow } from "./beat";
 import { CONNECT_LABEL, LAST_CLIENT_KEY } from "./clients";
 import { NotFoundScreen } from "./not-found";
 import { OneClickBanner } from "./one-click-banner";
 import { oneClickHref, oneClickMode } from "./one-click";
+import { buildStoryboard } from "./storyboard";
 
 // The /<slug> connect page. It resolves the public link, then turns it into the visitor's own setup: pick a
 // client, see steps drawn to resemble THAT client's surface, with a one-click Add above the manual fallback.
@@ -93,7 +93,7 @@ const stepCountClass = css({ textTransform: "none", letterSpacing: "[0]" });
 
 const fallbackLabel = css({ margin: "[-2px 0 10px]", fontSize: "[12px]", color: "text.faint" });
 
-const stepsClass = css({ display: "flex", flexDirection: "column", gap: "4" });
+const stepsClass = css({ display: "flex", flexDirection: "column", gap: "7" });
 
 const footerSlotClass = css({ marginTop: "[40px]" });
 
@@ -145,7 +145,7 @@ function initialClient(kind: LinkKind): ClientId {
 /** The resolved page — the link exists, so build the visitor's setup around their chosen client. */
 function Resolved({ link }: { link: PublicLink }) {
   const [client, setClient] = useState<ClientId>(() => initialClient(link.kind));
-  const steps = buildSteps(client, link);
+  const story = buildStoryboard(client, link);
   const mode = oneClickMode(client, link.kind);
   const href = mode ? oneClickHref(client, link) : null;
   const label = CONNECT_LABEL[client];
@@ -186,13 +186,16 @@ function Resolved({ link }: { link: PublicLink }) {
           <h2 className={sectionLabel}>
             <span>Connect with {label}</span>
             <span className={stepCountClass}>
-              {steps.length} step{steps.length > 1 ? "s" : ""}
+              {story.beats.length} step{story.beats.length > 1 ? "s" : ""}
             </span>
           </h2>
 
           {mode ? (
             <>
               <OneClickBanner
+                // Keyed by client so a client switch remounts the banner — its idle→opening→sent phase must
+                // never carry a stale "Sent to <other client>" across a change the reader didn't act on.
+                key={client}
                 client={client}
                 href={href}
                 onAdd={() => track.oneClick({ client, transport: link.kind })}
@@ -204,19 +207,15 @@ function Resolved({ link }: { link: PublicLink }) {
           ) : null}
 
           <div className={stepsClass}>
-            {steps.map((step, i) => (
-              <StepCard
+            {story.beats.map((beat, i) => (
+              <BeatRow
                 key={`${client}-${i}`}
                 index={i + 1}
-                title={step.title}
-                description={step.description}
-                visual={step.visual}
-                command={step.command}
-                prompt={step.prompt}
-                block={step.block}
+                beat={beat}
                 onCopied={() => track.copyCommand({ client, transport: link.kind })}
               />
             ))}
+            <ConnectedRow label={story.cap} />
           </div>
 
           <h2 className={sectionLabel}>Add a badge to your README</h2>

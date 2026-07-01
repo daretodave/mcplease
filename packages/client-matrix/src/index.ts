@@ -58,11 +58,14 @@ export const CLIENTS: readonly ClientEntry[] = [
     oneClick: "none",
   },
   {
+    // Labelled "Claude" (not "Claude Desktop"): the connector lives on the Claude account and shows across
+    // Claude's surfaces. Add path is Customize → Connectors → Add custom connector → Connect (authenticate).
     id: "claude-desktop",
-    label: "Claude Desktop",
+    label: "Claude",
     http: true,
     stdio: true,
-    manual: "Settings → Connectors (remote URL); or claude_desktop_config.json mcpServers.<name>",
+    manual:
+      "Customize → Connectors → Add custom connector (remote URL); or claude_desktop_config.json",
     oneClick: "partial",
     remoteConfigKey: "url",
   },
@@ -71,8 +74,7 @@ export const CLIENTS: readonly ClientEntry[] = [
     label: "ChatGPT",
     http: true,
     stdio: false,
-    manual:
-      "Settings → Connectors → add custom MCP (remote URL); needs developer mode / a paid tier",
+    manual: "Developer mode → Connectors → Create (remote URL); needs a paid tier",
     oneClick: "none",
   },
   {
@@ -80,16 +82,18 @@ export const CLIENTS: readonly ClientEntry[] = [
     label: "Cursor",
     http: true,
     stdio: true,
-    manual: "Settings → MCP → Add; ~/.cursor/mcp.json (url / command)",
+    manual: "Settings → Tools & Integrations → Add; ~/.cursor/mcp.json (mcpServers.url / command)",
     oneClick: "full",
     remoteConfigKey: "url",
   },
   {
+    // VS Code keys servers under a top-level `servers` object (NOT mcpServers), with an explicit transport
+    // `type` — `http` for a remote URL, `stdio` for a local command.
     id: "vscode",
     label: "VS Code (Copilot)",
     http: true,
     stdio: true,
-    manual: "code --add-mcp '{…}'; or .vscode/mcp.json",
+    manual: "MCP: Add Server… → HTTP; or .vscode/mcp.json (servers.<name> with a type)",
     oneClick: "full",
     remoteConfigKey: "url",
   },
@@ -107,7 +111,8 @@ export const CLIENTS: readonly ClientEntry[] = [
     label: "Cline",
     http: true,
     stdio: true,
-    manual: "MCP Servers panel; cline_mcp_settings.json mcpServers.<name>",
+    manual:
+      "MCP Servers → Remote → Add (Streamable HTTP); cline_mcp_settings.json mcpServers.<name>",
     oneClick: "none",
     remoteConfigKey: "url",
   },
@@ -116,15 +121,16 @@ export const CLIENTS: readonly ClientEntry[] = [
     label: "Zed",
     http: true,
     stdio: true,
-    manual: "settings.json → context_servers.<name> (command)",
+    manual: "settings.json → context_servers.<name> (url / command)",
     oneClick: "none",
+    remoteConfigKey: "url",
   },
   {
     id: "goose",
     label: "Goose",
     http: true,
     stdio: true,
-    manual: "goose configure → add extension (SSE remote / command stdio)",
+    manual: "Extensions → Add custom extension (Streamable HTTP remote / command stdio)",
     oneClick: "none",
   },
   {

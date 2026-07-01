@@ -88,7 +88,8 @@ describe("SharePage", () => {
     fireEvent.click(screen.getByRole("radio", { name: /Cursor/ }));
     expect(track.selectClient).toHaveBeenCalledWith({ client: "cursor", transport: "http" });
     expect(screen.getByText("Add to Cursor in one click")).toBeInTheDocument();
-    expect(screen.getByText("Settings → MCP → Add")).toBeInTheDocument();
+    // The manual storyboard renders below the one-click banner — Cursor's real tap-path.
+    expect(screen.getByText("Settings → Tools & Integrations → Add")).toBeInTheDocument();
   });
 
   it("renders an announced error state when the fetch fails", async () => {

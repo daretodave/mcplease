@@ -70,11 +70,11 @@ describe("OneClickBanner", () => {
     const href =
       "https://claude.ai/customize/connectors?modal=add-custom-connector&connectorName=acme";
     render(<OneClickBanner client="claude-desktop" href={href} onAdd={onAdd} />);
-    fireEvent.click(screen.getByRole("button", { name: /Add to Claude Desktop/ }));
+    fireEvent.click(screen.getByRole("button", { name: /Add to Claude/ }));
     expect(onAdd).toHaveBeenCalledTimes(1);
     expect(open).toHaveBeenCalledWith(href, "_blank", "noopener,noreferrer");
     expect(assign).not.toHaveBeenCalled();
-    expect(screen.getByRole("button", { name: /Sent to Claude Desktop/ })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /Sent to Claude/ })).toBeInTheDocument();
   });
 
   it("announces progress to assistive tech via a live region", () => {

@@ -37,4 +37,21 @@ describe("TerminalMock", () => {
     );
     expect(getByText("▸ Add Extension › Remote (SSE)")).toBeInTheDocument();
   });
+
+  it("renders the /mcp auth beat: a heading, a glowing needs-auth row, and a connected row", () => {
+    const { getByText } = render(
+      <TerminalMock
+        title="claude · /mcp"
+        lines={[
+          { head: true, text: "Manage MCP servers" },
+          { text: "acme-mcp", tag: "needs authentication", tagState: "warn", glow: true },
+          { dim: true, text: "github-mirror", tag: "connected", tagState: "ok" },
+        ]}
+      />,
+    );
+    expect(getByText("Manage MCP servers")).toBeInTheDocument();
+    expect(getByText("needs authentication")).toBeInTheDocument();
+    expect(getByText("connected")).toBeInTheDocument();
+    expect(getByText("acme-mcp")).toBeInTheDocument();
+  });
 });

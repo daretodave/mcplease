@@ -37,9 +37,9 @@ describe("oneClickMode", () => {
     expect(oneClickMode("claude-desktop", "stdio")).toBeNull();
   });
 
-  it("stays full for Cursor and VS Code on stdio", () => {
-    expect(oneClickMode("cursor", "stdio")).toBe("full");
-    expect(oneClickMode("vscode", "stdio")).toBe("full");
+  it("is null on stdio for every client — one-click is remote-only (clone + build must happen first)", () => {
+    expect(oneClickMode("cursor", "stdio")).toBeNull();
+    expect(oneClickMode("vscode", "stdio")).toBeNull();
   });
 
   it("is null for manual-only clients", () => {
