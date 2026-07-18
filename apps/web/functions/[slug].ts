@@ -17,6 +17,32 @@ interface Env {
   SUPABASE_ANON_KEY: string;
 }
 
+/** The reserved legal routes live in the same single-segment space as the slugs (the slug rules reserve
+ *  their names, so no link can ever shadow them). They get their own honest head — without this they'd
+ *  hit the database, miss, and unfurl as "Link not found". */
+function legalMeta(slug: string, origin: string): ShareMeta | null {
+  const pages: Record<string, { title: string; description: string }> = {
+    terms: {
+      title: "Terms · mcplease",
+      description:
+        "The deal in plain words: a free public connect page for your MCP server, your edit link as the only key, no accounts.",
+    },
+    privacy: {
+      title: "Privacy · mcplease",
+      description:
+        "No accounts. mcplease stores what you type when you create a link, counts usage anonymously, and nothing else.",
+    },
+  };
+  const page = pages[slug];
+  if (!page) return null;
+  return {
+    ...page,
+    image: `${origin}/og-default.png`,
+    imageAlt: "mcplease — share an MCP server as a link",
+    url: `${origin}/${slug}`,
+  };
+}
+
 /** Escape a value bound for raw markup. `setAttribute` escapes its own values; this guards the image tags
  *  injected with `after(html)`. */
 function esc(value: string): string {
@@ -92,6 +118,9 @@ export const onRequestGet: PagesFunction<Env> = async ({ request, env, params })
 
   const shell = await env.ASSETS.fetch(new URL("/index.html", request.url));
   const origin = new URL(request.url).origin;
+
+  const legal = legalMeta(slug, origin);
+  if (legal) return injectMeta(shell, legal);
 
   let link: PublicLink | null;
   try {

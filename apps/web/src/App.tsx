@@ -3,12 +3,14 @@ import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import { queryClient } from "./lib/query-client";
 import { CreatePage } from "./pages/create/create";
 import { EditPage } from "./pages/edit/edit";
+import { PrivacyPage } from "./pages/legal/privacy";
+import { TermsPage } from "./pages/legal/terms";
 import { Placeholder } from "./pages/placeholder";
 import { SharePage } from "./pages/share/share";
 
-// The client-only route table. The landing is the create form; the rest render a placeholder until their
-// real screen is designed. The shapes (/, /<slug>, /e/<uuid>, /terms, /privacy) are the durable part. Static
-// segments out-rank the dynamic /:slug, so /terms and /privacy resolve to themselves, never to a slug.
+// The client-only route table. The shapes (/, /<slug>, /e/<uuid>, /terms, /privacy) are the durable part.
+// Static segments out-rank the dynamic /:slug, so /terms and /privacy resolve to themselves, never to a
+// slug — and the slug rules reserve both words, so no link can ever claim them.
 const router = createBrowserRouter([
   {
     path: "/",
@@ -20,21 +22,11 @@ const router = createBrowserRouter([
   },
   {
     path: "/terms",
-    element: (
-      <Placeholder
-        title="Terms"
-        blurb="Short and plain — what we store and how to remove it. Coming soon."
-      />
-    ),
+    element: <TermsPage />,
   },
   {
     path: "/privacy",
-    element: (
-      <Placeholder
-        title="Privacy"
-        blurb="Anonymous analytics, no accounts. The details land here. Coming soon."
-      />
-    ),
+    element: <PrivacyPage />,
   },
   {
     path: "/:slug",
